@@ -20,6 +20,6 @@ while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   # Change background
   cp ${BG_DIR}/$(ls "${BG_DIR}" | sort -R | tail -n1) ${NIMG}
   
-  ${TStream}/stream.py "${TStream}"
+  ${TStream}/stream.py -d "${TStream}" --stream
   sleep 1
 done

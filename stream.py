@@ -4,40 +4,111 @@
 Generate ffmpeg command with filters, and options for twitch
 """
 
-import os
-import datetime
+import argparse
 
-DIR = None
-DIR = str(sys.argv[1])
+parser = argparse.ArgumentParser(
+  description='Generate ffmpeg command with filters and options for twitch.',
+)
+
+#parser.add_argument(
+#    "-v",
+#    "--verbose",
+#    default=False,
+#    action="store_const",
+#    help="Print output in log and stdout."
+#)
+
+parser.add_argument(
+    "-d",
+    "--directory",
+    type=str,
+    help='Twitch stream base directory, who contains background, fonts, scripts and data.'
+)
+
+parser.add_argument(
+    "--dry-run",
+    default=False,
+    action="store_true",
+    help="Generate ffmpeg command, without stream or write file."
+)
+
+parser.add_argument(
+    "-s",
+    "--stream",
+    default=False,
+    action="store_true",
+    help="Launch Twitch stream. Can’t be used with --file option"
+)
+parser.add_argument(
+    "-f",
+    "--file",
+    default=False,
+    action="store_true",
+    help="Record in file. Can't be used with --stream option."
+)
+args = parser.parse_args()
+
+
+import datetime
+LOG = f"{args.directory}/data/stream.log"
+def stream_log( msg:str ):
+  with open(LOG, 'a') as logfile:
+    logfile.write( f"\n{datetime.datetime.now()}\t{msg}" )
+
+if args.dry_run != False:
+  print("Dry run mode.\n")
+
+try:
+  if not args.stream and not args.file:
+    raise Exception('No stream or file output.')
+
+  # Need only one.
+  if args.stream and args.file:
+    raise Exception('Please choose betwitch streaming (--stream) or recording (--file).')
+
+except Exception as e:
+  #stream_log( e.msg )
+  print( e )
+  exit(0)
+
+import os
 
 endl = " \\\n   "
 
 RES = '1920x1080'
 
-KEY_FILE = f"{DIR}/twitch.key"
-NPLAY = f"{DIR}/data/now.playing"
-IMG = f"{DIR}/data/background.jpg"
+KEY_FILE = f"{args.directory}/twitch.key"
+NPLAY = f"{args.directory}/data/now.playing"
+IMG = f"{args.directory}/data/background.jpg"
 
-NP_FONT = f"{DIR}/fonts/font_np.otf"
-NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxcolor=black@0.6 :boxborderw=25"
-NP_POS = f"x=(w-text_w)/2 :y=(h-text_h)-15" # centered at 5px from bottom
+NP_FONT = f"{args.directory}/fonts/font_np.otf"
+NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=25"
+#NP_POS = f"x=(w-text_w)/2 :y=(h-text_h)-15" # centered at 5px from bottom
+NP_POS = f"x=50 :y=(h-text_h)-15" # centered at 5px from bottom
 
 
-T_FONT = f"{DIR}/fonts/font_t.ttf"
-T_STYLE = f"fontcolor=white :fontsize=90 :box=1 :boxcolor=black@0.6 :boxborderw=5"
-T_POS = f"x=(w-text_w)/2 :y=5" # centered at 5px from top
+T_FONT = f"{args.directory}/fonts/font_t.ttf"
+T_STYLE = f"fontcolor=white :text_align=C :fontsize=130 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=5"
+T_POS = f"x=50 :y=15" # centered at 5px from top
 T_OPTS = f"{NP_FONT} :textfile={NPLAY} :reload=1 :{NP_STYLE} :{NP_POS}"
 
-def stream_log( msg:str ):
-  with open(f"{DIR}/data/stream.log", 'a') as logfile:
-    logfile.write( f"{datetime.datetime.now()} > {msg" )
 
-TWITCH_KEY = None
-with open(KEY_FILE, 'r') as keyFile:
-    TWITCH_KEY = keyFile.readline()
-if TWITCH_KEY == '' or TWITCH_KEY == None:
+
+
+
+
+TWITCH_KEY = 'rtmp://live.twitch.tv/app/'
+# Don't load stream key if not necessary.
+if args.stream:
+  with open(KEY_FILE, 'r') as keyFile:
+    # First line is key.
+    TWITCH_KEY = TWITCH_KEY + keyFile.readline()
+
+  if TWITCH_KEY == 'rtmp://live.twitch.tv/app/':
     raise Exception( f"No twitch key in '{KEY_FILE}'" )
-TWITCH_URL = f"rtmp://live.twitch.tv/app/{TWITCH_KEY}"
+  TWITCH_URL = f"rtmp://live.twitch.tv/app/{TWITCH_KEY}"
+else:
+  TWITCH_KEY = TWITCH_KEY + '<twitch key>'
 
 
 command = '/usr/bin/ffmpeg ' #-report '
@@ -63,6 +134,7 @@ filters = [
 options = [
     '-c:v libx264 -preset faster -b:v 1600k',
     '-x264opts keyint=60 -r 30 -pix_fmt yuv420p',
+    '-loglevel 16'
   ]
 
 maps = [
@@ -70,29 +142,30 @@ maps = [
   '1:a',  # audio
 ]
 
-outputData = f"-f flv {TWITCH_URL}"
-#outputData = f"{DIR}/data/output.mp4"
+if args.file:
+  outputData = f"{args.directory}/data/output.mp4"
+elif args.stream:
+  outputData = f"-f flv {TWITCH_URL}"
 
 complete_process = command + endl
-
 if len(inputData) > 0:
   complete_process += endl.join(inputData) + endl
-
-
 if len(filters) > 0:
   complete_process += '-filter_complex "' + f" ;{endl}   ".join(filters) + '" '+endl
-
 if len(options) > 0:
   complete_process += endl.join(options) + endl
 
 for stream in maps:
   complete_process += f"-map {stream} "
 
-
 complete_process += endl + outputData
 
-print( complete_process + "\n\n" )
 
-stream_log('ffmpg starts')
-os.system( complete_process )
-stream_log('ffmpg stops')
+if args.dry_run:
+  print( complete_process )
+else:
+  stream_log('ffmpg starts')
+  os.system( f"echo >> {LOG} ; {complete_process} 2>> {LOG}" )
+  stream_log('ffmpg stops')
+
+
