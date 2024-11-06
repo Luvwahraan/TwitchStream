@@ -33,10 +33,14 @@ NOWP=now_playing.py
 #IMG=
 #cp ${BG}/$(ls "${BG}" | sort -R | tail -n1) ${NIMG}
 
-roon -nz $GROUP | /usr/bin/sed -nr '/Track|Artist|Album/ { s/[\t ]+([A-Z][a-z]+:)[\t ]+(.{1,45})(.*)/\1\t\2\n\t\t\3/ ; s/\n\t\t//g ; p }' > $RP
+roon -nz $GROUP | /usr/bin/sed -nr '/Track|Artist|Album/ { s/[\t ]+([A-Z][a-z]+:)[\t ]+(.*)/\1\2/ ; s/\n\t\t//g ; p }' > $RP
 
-echo -ne "Updated:" > $NP
-date +%T >> $NP
+sed -nr '/Track/ { s/Track:(.*)/\1/ ;p }'  $NP > ${DIR}/data/track.np
+sed -nr '/Artist/ { s/Artist:(.*)/\1/ ;p }'  $NP > ${DIR}/data/artist.np
+sed -nr '/Album/ { s/Album:(.*)/\1/ ;p }'  $NP > ${DIR}/data/album.np
+
+echo -e "1s ago" > $NP
+#date +%T >> $NP
 cat $RP >> $NP
 
 /usr/bin/sleep 1

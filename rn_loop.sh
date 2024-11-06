@@ -4,10 +4,12 @@
 #
 
 TStream=/home/luvwahraan/TwitchStream
-Disk=${TStream}
+Disk=${TStream}/data
 
 RP=${Disk}/roon_playing
-NP=${Disk}/now_playing
+NP=${Disk}/now.playing
+
+WAIT=10
 
 LOCK_FILE=${Disk}/roon_np.lock
 
@@ -19,5 +21,23 @@ while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   echo -n '.'
 
   ${TStream}/roon_now.sh 'Roon Server' "${TStream}"
-  /usr/bin/sleep 10
+
+  # Update last now playing checking
+  for i in $(seq $WAIT) ; do
+    LAST=$(head -n1 $NP | sed -r "s/([0-9]+)\+?s ago/\1/")
+    LAST=$(( ${LAST} + 1 ))
+    TEXT=$LAST
+
+    if [ ${LAST} -gt $(( $WAIT - 2 )) ] ; then
+      TEXT="${LAST}+"
+    fi
+
+    if [ ${LAST} -lt $WAIT ] ; then
+      sed -r "s/([0-9]+\+?)(s ago)/${TEXT}\2/" $NP > $NP.1
+      cat $NP.1 > $NP
+    fi
+
+    sleep 1
+  done
+
 done
