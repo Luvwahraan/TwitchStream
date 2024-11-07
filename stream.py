@@ -123,11 +123,11 @@ def genOverlays():
     layout_fg = f"v{vn+2}"
     
     border = 5
-    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=1880 :boxcolor=black@0.6 :boxborderw={border}|40"
+    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=(1920-135) :boxcolor=black@0.6 :boxborderw={border}|25|{border}|110"
     style_fg = 'fontcolor=white :fontsize=58 :box=0'
     
     pos = f"y=860+({pos_count}*(41+{border*2}))"
-    pos_bg = f"x=70 :{pos}"
+    pos_bg = f"x=50 :{pos}"
     pos_fg = f"x=200 :{pos}"
     
     textout_bg = f"[{vin_bg}]drawtext={NP_FONT} :text={elem} :{style_bg} :{pos_bg},format=rgba[{text_bg}]"
