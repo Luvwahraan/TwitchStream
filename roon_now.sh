@@ -39,8 +39,8 @@ sed -nr '/Track/ { s/Track:(.*)/\1/ ;p }'  $NP > ${DIR}/data/track.np
 sed -nr '/Artist/ { s/Artist:(.*)/\1/ ;p }'  $NP > ${DIR}/data/artist.np
 sed -nr '/Album/ { s/Album:(.*)/\1/ ;p }'  $NP > ${DIR}/data/album.np
 
-echo -e "1s ago" > $NP
+#echo -e "1s ago" > $NP
 #date +%T >> $NP
-cat $RP >> $NP
+cat $RP > $NP
 
 /usr/bin/sleep 1
