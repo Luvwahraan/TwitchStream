@@ -34,8 +34,12 @@ echo '' > ${NP}
 touch ${RP}
 
 echo "Alsa loopback"
-screen -dmS alsaloop alsaloop -r 48000 -C hw:0 -P hw:0 -l 256 -s 0 -U
-echo $! > ${DISK}/loopback.pid
+alsaloop_pid=$(ps x | sed -nr '/alsaloop/ { /sed|SCREEN/! { s/ +/ /g ; s/([0-9]+) .*/\1/ ; p} }')
+if [ -n "$alsaloop_pid" ] ; then
+  screen -dmS alsaloop alsaloop -r 48000 -C hw:0 -P hw:0 -l 256 -s 0 -U
+  alsaloop_pid=$!
+fi
+echo ${alsaloop_pid} > ${DISK}/loopback.pid
 
 echo "Roon playback."
 roon -z 'Roon Server' -c play
