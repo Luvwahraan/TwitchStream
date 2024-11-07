@@ -12,12 +12,16 @@ NP=${DISK}/now.playing
 LOCK_FILE=${DISK}/roon_np.lock
 
 BG=${BASE_DIR}/backgrounds
-NIMG=${DISK}/background.jpg
+IMG=${DISK}/background.jpg
+NIMG=$(ls "${BG}" | sort -R | tail -n1)
 
 echo "Copy a random stream background."
-cp ${BG}/$(ls "${BG}" | sort -R | tail -n1) ${NIMG}
+echo -e "\t${NIMG}"
+cat "${BG}/${NIMG}" > "${IMG}"
 
-ROON=/usr/local/Roon
+read
+
+ROON=/usr/local/Ropon
 ROONAPI=${ROON}/api
 ROONETC=${ROON}/etc
 ROONCONF=${ROONETC}/pyroonconf
@@ -33,24 +37,31 @@ echo "Reset counters."
 echo '' > ${NP}
 touch ${RP}
 
+read
+
 echo "Alsa loopback"
 alsaloop_pid=$(ps x | sed -nr '/alsaloop/ { /sed|SCREEN/! { s/ +/ /g ; s/([0-9]+) .*/\1/ ; p} }')
 if [ -n "$alsaloop_pid" ] ; then
-  echo -e "\tLoopback found."
+  echo -e "\tLoopback found '${alsaloop_pid}'"
 else
-  echo -e "\tNo loopback."
+  echo -e "\tNo loopback  '${alsaloop_pid}'"
   screen -dmS alsaloop alsaloop -r 48000 -C hw:0 -P hw:0 -l 256 -s 0 -U
   alsaloop_pid=$!
 fi
 echo ${alsaloop_pid} > ${DISK}/loopback.pid
 
+read
+
 echo "Roon playback."
 roon -z 'Roon Server' -c play
 
 echo "Roon now playing data."
-screen -dmS ${BASE_DIR}/rn_loop.sh
+screen -dmS np ${BASE_DIR}/rn_loop.sh
 echo $! > ${DISK}/now_playing.pid
 
 echo "ffmpeg stream"
-screen -dmS ${BASE_DIR}/rec_loop.sh
+screen -dmS stream ${BASE_DIR}/rec_loop.sh
 echo $! > ${DISK}/stream.pid
+
+echo "All done."
+screen -ls
