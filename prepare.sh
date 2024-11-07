@@ -46,7 +46,7 @@ if [ -n "$alsaloop_pid" ] ; then
 else
   echo -e "\tNo loopback  '${alsaloop_pid}'"
   screen -dmS alsaloop alsaloop -r 48000 -C hw:0 -P hw:0 -l 256 -s 0 -U
-  alsaloop_pid=$!
+  alsaloop_pid=$(ps x | sed -nr '/alsaloop/ { /sed|SCREEN/! { s/ +/ /g ; s/([0-9]+) .*/\1/ ; p} }')
 fi
 echo ${alsaloop_pid} > ${DISK}/loopback.pid
 
@@ -57,11 +57,8 @@ roon -z 'Roon Server' -c play
 
 echo "Roon now playing data."
 screen -dmS np ${BASE_DIR}/rn_loop.sh
-echo $! > ${DISK}/now_playing.pid
 
 echo "ffmpeg stream"
 screen -dmS stream ${BASE_DIR}/rec_loop.sh
-echo $! > ${DISK}/stream.pid
 
-echo "All done."
 screen -ls
