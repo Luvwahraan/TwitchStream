@@ -11,15 +11,19 @@ NP=${DISK}/now.playing
 NP=${DISK}/last.np
 NB=${DISK}/count.np
 
+SPID=${DISK}/now_playing.pid
+
 LOCK_FILE=${DISK}/roon_np.lock
 echo 1 > "$LOCK_FILE"
+
+echo $$ > ${SPID}
 
 STREAM_CRASH=$(tail -n1 $NB)
 WAIT=10
 
 PID=''
 
-trap "echo 0 > $LOCK_FILE ; echo '' > $NP ; kill $PID ; exit 0" \
+trap "kill -9 ${PID} ; echo '' > ${NP} ; echo '' > ${SPID} ; exit 0" \
       HUP INT QUIT EXIT KILL TERM #1 2 3 9 15
 
 counter() {
