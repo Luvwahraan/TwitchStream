@@ -36,6 +36,9 @@ touch ${RP}
 echo "Alsa loopback"
 alsaloop_pid=$(ps x | sed -nr '/alsaloop/ { /sed|SCREEN/! { s/ +/ /g ; s/([0-9]+) .*/\1/ ; p} }')
 if [ -n "$alsaloop_pid" ] ; then
+  echo -e "\tLoopback found."
+else
+  echo -e "\tNo loopback."
   screen -dmS alsaloop alsaloop -r 48000 -C hw:0 -P hw:0 -l 256 -s 0 -U
   alsaloop_pid=$!
 fi
