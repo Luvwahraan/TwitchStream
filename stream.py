@@ -10,13 +10,13 @@ parser = argparse.ArgumentParser(
   description='Generate ffmpeg command with filters and options for twitch.',
 )
 
-#parser.add_argument(
-#    "-v",
-#    "--verbose",
-#    default=False,
-#    action="store_const",
-#    help="Print output in log and stdout."
-#)
+parser.add_argument(
+    "-v",
+    "--verbose",
+    default=False,
+    action="store_true",
+    help="Print output in log and stdout."
+)
 
 parser.add_argument(
     "-d",
@@ -71,31 +71,6 @@ except Exception as e:
   print( e )
   exit(0)
 
-import os
-
-endl = " \\\n   "
-
-RES = '1920x1080'
-
-KEY_FILE = f"{args.directory}/twitch.key"
-NPLAY = f"{args.directory}/data/now.playing"
-IMG = f"{args.directory}/data/background.jpg"
-
-NP_FONT = f"{args.directory}/fonts/font_np.otf"
-NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=25"
-#NP_POS = f"x=(w-text_w)/2 :y=(h-text_h)-15" # centered at 5px from bottom
-NP_POS = f"x=50 :y=(h-text_h)-15" # centered at 5px from bottom
-
-
-T_FONT = f"{args.directory}/fonts/font_t.ttf"
-T_STYLE = f"fontcolor=white :text_align=C :fontsize=130 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=5"
-T_POS = f"x=50 :y=15" # centered at 5px from top
-T_OPTS = f"{NP_FONT} :textfile={NPLAY} :reload=1 :{NP_STYLE} :{NP_POS}"
-
-
-
-
-
 
 TWITCH_KEY = 'rtmp://live.twitch.tv/app/'
 # Don't load stream key if not necessary.
@@ -110,6 +85,73 @@ if args.stream:
 else:
   TWITCH_KEY = TWITCH_KEY + '<twitch key>'
 
+endl = " \\\n   "
+
+RES = '1920x1080'
+
+KEY_FILE = f"{args.directory}/twitch.key"
+NPLAY = f"{args.directory}/data/now.playing"
+NCOUNT = f"{args.directory}/data/count.np"
+IMG = f"{args.directory}/data/background.jpg"
+
+NP_FONT = f"{args.directory}/fonts/font_np.otf"
+NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=2|25"
+#NP_POS = f"x=(w-text_w)/2 :y=(h-text_h)-15" # centered at 5px from bottom
+NP_POS = f"x=50 :y=(h-th)-25" # centered at 5px from bottom
+NP_OPTS = f"{NP_FONT} :textfile={NPLAY} :reload=1 :{NP_STYLE} :{NP_POS}"
+
+
+T_FONT = f"{args.directory}/fonts/font_t.ttf"
+T_STYLE = f"fontcolor=white :text_align=C :fontsize=130 :box=1 :boxw=1920 :boxcolor=black@0.6 :boxborderw=5"
+T_POS = f"x=30 :y=15" # centered at 5px from top
+
+filters = []
+def genOverlays():
+  vn = 2
+  last = ''
+  pos_count = 1
+  for elem in ['track', 'artist', 'album']:
+    print(f"Generating track overlay")
+    
+    file = f"{args.directory}/data/{elem}.np"
+    vin_bg = f"v{vn}"
+    text_bg = f"t{vn}"
+    layout_bg = f"v{vn+1}"
+    
+    vin_fg = f"v{vn+1}"
+    text_fg = f"t{vn+1}"
+    layout_fg = f"v{vn+2}"
+    
+    border = 5
+    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=1880 :boxcolor=black@0.6 :boxborderw={border}|40"
+    style_fg = 'fontcolor=white :fontsize=58 :box=0'
+    
+    pos = f"y=860+({pos_count}*(41+{border*2}))"
+    pos_bg = f"x=70 :{pos}"
+    pos_fg = f"x=200 :{pos}"
+    
+    textout_bg = f"[{vin_bg}]drawtext={NP_FONT} :text={elem} :{style_bg} :{pos_bg},format=rgba[{text_bg}]"
+    overlay_bg = f"[{vin_bg}][{text_bg}]overlay=format=rgb[{layout_bg}]"   
+    filters.append(textout_bg)
+    filters.append(overlay_bg)
+    
+    textout_fg = f"[{vin_fg}]drawtext={NP_FONT} :textfile={file} :reload=1 :{style_fg} :{pos_fg},format=rgba[{text_fg}]"
+    overlay_fg = f"[{vin_fg}][{text_fg}]overlay=format=rgb[{layout_fg}]"
+    filters.append(textout_fg)
+    filters.append(overlay_fg)
+    
+    last = layout_fg
+    vn = vn + 2
+    pos_count += 1
+  
+  cnb_out = 'cnb'
+  count_nb = f"[{last}]drawtext={NP_FONT} :textfile={NCOUNT} :reload=1 :fontcolor=white :fontsize=32 :box=0 :x=5:y=932,format=rgba[nb]"
+  overlay = f"[{last}][nb]overlay=format=rgb[{cnb_out}]"
+  filters.append(count_nb)
+  filters.append(overlay)
+  
+  return cnb_out
+
 
 command = '/usr/bin/ffmpeg ' #-report '
 inputData = [
@@ -121,24 +163,26 @@ filters = [
     # audio waves
     f"[1:a]showwaves=s={RES} :mode=line,colorkey=black[waves]",
     '[bg][waves]overlay=format=rgb[v1]',
+    # local time
+    f"[v1]drawtext={T_FONT} :text='%"+'{localtime\\:%T}'+f"' :{T_STYLE} :{T_POS}[t]",
+    '[v1][t]overlay=format=rgb[v2]',
 
     # now playing
-    f"[v1]drawtext={T_OPTS},format=rgba[np]",
-    '[v1][np]overlay=format=rgb[v2]',
-
-    # local time
-    f"[v2]drawtext={T_FONT} :text='%"+'{localtime\\:%T}'+f"' :{T_STYLE} :{T_POS}[t]",
-    '[v2][t]overlay=format=rgb[v3]',
+    #f"[v2]drawtext={NP_OPTS},format=rgba[np]",
+    #'[v2][np]overlay=format=rgb[output]',
   ]
+output = genOverlays()
 
 options = [
     '-c:v libx264 -preset faster -b:v 1600k',
     '-x264opts keyint=60 -r 30 -pix_fmt yuv420p',
-    '-loglevel 16'
   ]
 
+# Reduce verbosity
+if not args.verbose: options.append('-loglevel 16')
+
 maps = [
-  '[v3]', # overlays
+  f"[{output}]", # overlays
   '1:a',  # audio
 ]
 
@@ -164,8 +208,16 @@ complete_process += endl + outputData
 if args.dry_run:
   print( complete_process )
 else:
+  import os
   stream_log('ffmpg starts')
-  os.system( f"echo >> {LOG} ; {complete_process} 2>> {LOG}" )
+  
+  # Too much output to log if verbose, but print command.
+  if args.verbose:
+    print( complete_process )
+    os.system( complete_process )
+  else:
+    os.system( f"echo >> {LOG} ; {complete_process} 2>> {LOG}" )
+
   stream_log('ffmpg stops')
 
 
