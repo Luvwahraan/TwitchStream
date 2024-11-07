@@ -3,15 +3,15 @@
 # Room now playing loop
 #
 
-TStream=/home/luvwahraan/TwitchStream
-Disk=${TStream}/data
+BASE_DIR=/home/luvwahraan/TwitchStream
+DISK=${BASE_DIR}/data
 
-RP=${Disk}/roon_playing
-NP=${Disk}/now.playing
-NP=${Disk}/last.np
-NB=${Disk}/count.np
+RP=${DISK}/roon_playing
+NP=${DISK}/now.playing
+NP=${DISK}/last.np
+NB=${DISK}/count.np
 
-LOCK_FILE=${Disk}/roon_np.lock
+LOCK_FILE=${DISK}/roon_np.lock
 echo 1 > "$LOCK_FILE"
 
 STREAM_CRASH=$(tail -n1 $NB)
@@ -35,7 +35,7 @@ LAST_PID=0
 while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   echo -n '.'
 
-  ${TStream}/roon_now.sh 'Roon Server' "${TStream}"
+  ${BASE_DIR}/roon_now.sh 'Roon Server' "${BASE_DIR}"
 
   # Kill last counter
   kill $PID

@@ -6,11 +6,11 @@
 GROUP="$1"
 DIR="$2"
 
-TStream=${DIR}
-RP=$TStream/data/roon_playing
-NP=$TStream/data/now.playing
-LP=$TStream/data/last.played
-LOCK_FILE=$TStream/data/roon_np.lock
+BASE_DIR=${DIR}
+RP=$BASE_DIR/data/roon_playing
+NP=$BASE_DIR/data/now.playing
+LP=$BASE_DIR/data/last.played
+LOCK_FILE=$BASE_DIR/data/roon_np.lock
 
 
 ROON=/usr/local/Roon
@@ -28,8 +28,8 @@ NOWP=now_playing.py
 }
 
 
-#NIMG=${TStream}/data/background.jpg
-#BG=${TStream}/backgrounds
+#NIMG=${BASE_DIR}/data/background.jpg
+#BG=${BASE_DIR}/backgrounds
 #IMG=
 #cp ${BG}/$(ls "${BG}" | sort -R | tail -n1) ${NIMG}
 

@@ -4,14 +4,14 @@
 #
 
 
-TStream=/home/luvwahraan/TwitchStream
+BASE_DIR=/home/luvwahraan/TwitchStream
 
-DISK=${TStream}/data
+DISK=${BASE_DIR}/data
 RP=${DISK}/roon_playing
 NP=${DISK}/now.playing
 LOCK_FILE=${DISK}/roon_np.lock
 
-BG=${TStream}/backgrounds
+BG=${BASE_DIR}/backgrounds
 NIMG=${DISK}/background.jpg
 
 echo "Copy a random stream background."
@@ -41,9 +41,9 @@ echo "Roon playback."
 roon -z 'Roon Server' -c play
 
 echo "Roon now playing data."
-screen -dmS ${TStream}/rn_loop.sh
+screen -dmS ${BASE_DIR}/rn_loop.sh
 echo $! > ${DISK}/now_playing.pid
 
 echo "ffmpeg stream"
-screen -dmS ${TStream}/rec_loop.sh
+screen -dmS ${BASE_DIR}/rec_loop.sh
 echo $! > ${DISK}/stream.pid
