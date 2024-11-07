@@ -49,6 +49,14 @@ parser.add_argument(
 args = parser.parse_args()
 
 
+
+KEY_FILE = f"{args.directory}/twitch.key"
+NPLAY = f"{args.directory}/data/now.playing"
+NCOUNT = f"{args.directory}/data/count.np"
+IMG = f"{args.directory}/data/background.jpg"
+
+
+
 import datetime
 LOG = f"{args.directory}/data/stream.log"
 def stream_log( msg:str ):
@@ -88,11 +96,6 @@ else:
 endl = " \\\n   "
 
 RES = '1920x1080'
-
-KEY_FILE = f"{args.directory}/twitch.key"
-NPLAY = f"{args.directory}/data/now.playing"
-NCOUNT = f"{args.directory}/data/count.np"
-IMG = f"{args.directory}/data/background.jpg"
 
 NP_FONT = f"{args.directory}/fonts/font_np.otf"
 NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=2|25"
