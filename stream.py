@@ -126,7 +126,7 @@ def genOverlays():
     layout_fg = f"v{vn+2}"
     
     border = 5
-    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=(1920-135) :boxcolor=black@0.6 :boxborderw={border}|25|{border}|110"
+    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=1920 :boxcolor=black@0.6 :boxborderw={border}|25|{border}|110"
     style_fg = 'fontcolor=white :fontsize=58 :box=0'
     
     pos = f"y=860+({pos_count}*(41+{border*2}))"
@@ -177,7 +177,8 @@ filters = [
 output = genOverlays()
 
 options = [
-    '-c:v libx264 -preset faster -b:v 1600k',
+    #'-c:v libx264 -preset faster -b:v 1600k',
+    '-c:v libx264 -preset veryfast -b:v 1600k',
     '-x264opts keyint=60 -r 30 -pix_fmt yuv420p',
   ]
 

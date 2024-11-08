@@ -10,7 +10,7 @@ NB=${BASE_DIR}/data/count.np
 
 SPID=${BASE_DIR}/data/stream.pid
 
-LOG=${BASE_DIR}/data/${BASE_DIR}/data
+LOG=${BASE_DIR}/data/stream.log
 
 NIMG=${BASE_DIR}/data/background.jpg
 BG_DIR=${BASE_DIR}/backgrounds
@@ -37,7 +37,7 @@ while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   echo -n "Crash: ${CRASHED}" >> ${LOG}
   
   # Kill rn_loop, to avoid concurrent writes on count.np
-  kill -9 ${BASE_DIR}/data/now_playing.pid
+  kill -9 $(cat ${BASE_DIR}/data/now_playing.pid)
   
   UPDATED=$(head -n1 $NB)
   echo -e "${UPDATED}\n${CRASHED}" > $NB

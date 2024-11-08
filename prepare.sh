@@ -56,6 +56,7 @@ echo "Roon playback."
 roon -z 'Roon Server' -c play
 
 echo "Roon now playing data."
+kill -9 $(cat ${BASE_DIR}/data/now_playing.pid)
 screen -dmS np ${BASE_DIR}/rn_loop.sh
 
 echo "ffmpeg stream"
