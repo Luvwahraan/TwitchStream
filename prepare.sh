@@ -25,7 +25,7 @@ function background_handle() {
 
   # Resize all images
   for img in $(ls backgrounds) ; do
-    cp -fR "./${img}" "${BG}/${img}" # for now copy
+    cp -fR "backgrounds/${img}" "${BG}/${img}" # for now copy
     # ffmpeg -i ...
   done
 }
