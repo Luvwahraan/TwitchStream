@@ -3,7 +3,9 @@
 # Room now playing loop
 #
 
-BASE_DIR=/home/luvwahraan/TwitchStream
+BASE_DIR="$1"
+
+#BASE_DIR=/home/luvwahraan/TwitchStream
 DISK=${BASE_DIR}/data
 
 RP=${DISK}/roon_playing

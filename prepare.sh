@@ -5,6 +5,7 @@
 
 
 BASE_DIR=/home/luvwahraan/TwitchStream
+cd "${BASE_DIR}"
 
 DISK=${BASE_DIR}/data
 RP=${DISK}/roon_playing
@@ -12,13 +13,31 @@ NP=${DISK}/now.playing
 LOCK_FILE=${DISK}/roon_np.lock
 
 BG=${BASE_DIR}/backgrounds
+BG=${DISK}/backgrounds
 IMG=${DISK}/background.jpg
-NIMG=$(ls "${BG}" | sort -R | tail -n1)
 
-echo "Copy a random stream background."
-echo -e "\t${NIMG}"
-cat "${BG}/${NIMG}" > "${IMG}"
+# Resize backgrounds, and choose one for stream
+function background_handle() {
+  # Check repertory, and empty it
+  if [ ! -d "${DISK}" ] ; then
+    mkdir "${DISK}"
+  rm "${BG}/*"
 
+  # Resize all images
+  for img in $(ls backgrounds) ; do
+    cp -fR "./${img}" "${BG}/${img}" # for now copy
+    # ffmpeg -i ...
+  done
+}
+
+function choose_background() {
+  NIMG=$(ls "${BG}" | sort -R | tail -n1)
+  echo "Copy a random stream background."
+  echo -e "\t${NIMG}"
+  cat "${BG}/${NIMG}" > "${IMG}"
+}
+
+choose_background()
 read
 
 ROON=/usr/local/Ropon
@@ -57,9 +76,9 @@ roon -z 'Roon Server' -c play
 
 echo "Roon now playing data."
 kill -9 $(cat ${BASE_DIR}/data/now_playing.pid)
-screen -dmS np ${BASE_DIR}/rn_loop.sh
+screen -dmS np ${BASE_DIR}/rn_loop.sh "${BASE_DIR}"
 
 echo "ffmpeg stream"
-screen -dmS stream ${BASE_DIR}/rec_loop.sh
+screen -dmS stream ${BASE_DIR}/rec_loop.sh "${BASE_DIR}" '1920x1080'
 
 screen -ls

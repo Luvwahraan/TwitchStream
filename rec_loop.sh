@@ -3,7 +3,10 @@
 # Launch stream in loop.
 #
 
-BASE_DIR=/home/luvwahraan/TwitchStream
+BASE_DIR="$1"
+RES="$2"
+
+#BASE_DIR=/home/luvwahraan/TwitchStream
 NPLAY=$BASE_DIR/data/now_playing
 LOCK_FILE=${BASE_DIR}/data/roon_np.lock
 NB=${BASE_DIR}/data/count.np
@@ -13,7 +16,7 @@ SPID=${BASE_DIR}/data/stream.pid
 LOG=${BASE_DIR}/data/stream.log
 
 NIMG=${BASE_DIR}/data/background.jpg
-BG_DIR=${BASE_DIR}/backgrounds
+BG_DIR=${BASE_DIR}/backgrounds # todo: changing with data bg
 
 echo $$ > ${SPID}
 echo 1 > $LOCK_FILE
@@ -26,11 +29,11 @@ CRASHED=0
 while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
 
   # Change stream background with a random one.
-  cp ${BG_DIR}/$(ls "${BG_DIR}" | sort -R | tail -n1) ${NIMG}
+  cp ${BG_DIR}/$(ls "${BG_DIR}" | sort -R | tail -n1) "${NIMG}"
   
   # STREAM START
   #
-  ${BASE_DIR}/stream.py -d "${BASE_DIR}" --stream --verbose
+  ${BASE_DIR}/stream.py -d "${BASE_DIR}" -r "${RES}" --stream --verbose
   ###
   
   CRASHED=$(( $CRACHED + 1 ))

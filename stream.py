@@ -18,11 +18,18 @@ parser.add_argument(
     help="Print output in log and stdout."
 )
 
+
 parser.add_argument(
     "-d",
     "--directory",
     type=str,
     help='Twitch stream base directory, who contains background, fonts, scripts and data.'
+)
+parser.add_argument(
+    "-r",
+    "--resolution",
+    type=str,
+    help='ffmpeg output resolution.'
 )
 
 parser.add_argument(
@@ -95,7 +102,7 @@ else:
 
 endl = " \\\n   "
 
-RES = '1920x1080'
+RES = args.resolution # '1920x1080'
 
 NP_FONT = f"{args.directory}/fonts/font_np.otf"
 NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=2|25"
