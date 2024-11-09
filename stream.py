@@ -61,7 +61,7 @@ import datetime
 LOG = f"{args.directory}/data/stream.log"
 def stream_log( msg:str ):
   with open(LOG, 'a') as logfile:
-    logfile.write( f"\n{datetime.datetime.now()}\t{msg}" )
+    logfile.write( f"{datetime.datetime.now()}\t{msg}\n" )
 
 if args.dry_run != False:
   print("Dry run mode.\n")

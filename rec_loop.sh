@@ -34,7 +34,8 @@ while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   ###
   
   CRASHED=$(( $CRACHED + 1 ))
-  echo -n "Crash: ${CRASHED}" >> ${LOG}
+  echo "Crash grow to: ${CRASHED}"
+  echo "Crash grow to: ${CRASHED}" >> ${LOG}
   
   # Kill rn_loop, to avoid concurrent writes on count.np
   kill -9 $(cat ${BASE_DIR}/data/now_playing.pid)
