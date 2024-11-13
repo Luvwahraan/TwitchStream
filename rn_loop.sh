@@ -53,5 +53,6 @@ while [ $(head -n1 $LOCK_FILE) -eq 1 ] ; do
   counter &
   PID=$!
 
+  #wait ${PID}
   sleep ${WAIT}
 done

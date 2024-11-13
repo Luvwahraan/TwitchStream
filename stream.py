@@ -26,10 +26,14 @@ parser.add_argument(
     help='Twitch stream base directory, who contains background, fonts, scripts and data.'
 )
 parser.add_argument(
-    "-r",
-    "--resolution",
-    type=str,
-    help='ffmpeg output resolution.'
+    "--width",
+    type=int,
+    help='ffmpeg output width.'
+)
+parser.add_argument(
+    "--height",
+    type=int,
+    help='ffmpeg output height.'
 )
 
 parser.add_argument(
@@ -102,18 +106,22 @@ else:
 
 endl = " \\\n   "
 
-RES = args.resolution # '1920x1080'
+#RES = args.resolution # '1920x1080'
+RES_W = args.width
+RES_H = args.height
 
 NP_FONT = f"{args.directory}/fonts/font_np.otf"
-NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw=1820 :boxcolor=black@0.6 :boxborderw=2|25"
+NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw={RES_W} :boxcolor=black@0.6 :boxborderw=2|25"
+#NP_STYLE = f"fontcolor=white :fontsize=58 :box=1 :boxw={RES_W - 100} :boxcolor=black@0.6 :boxborderw=2|25"
 #NP_POS = f"x=(w-text_w)/2 :y=(h-text_h)-15" # centered at 5px from bottom
 NP_POS = f"x=50 :y=(h-th)-25" # centered at 5px from bottom
 NP_OPTS = f"{NP_FONT} :textfile={NPLAY} :reload=1 :{NP_STYLE} :{NP_POS}"
 
 
 T_FONT = f"{args.directory}/fonts/font_t.ttf"
-T_STYLE = f"fontcolor=white :text_align=C :fontsize=130 :box=1 :boxw=1920 :boxcolor=black@0.6 :boxborderw=5"
-T_POS = f"x=30 :y=15" # centered at 5px from top
+T_STYLE = f"fontcolor=white :text_align=C :fontsize=130 :box=1 :boxw={RES_W} :boxcolor=black@0.6 :boxborderw=5"
+#T_POS = f"x=30 :y=15" # centered at 5px from top
+T_POS = f"x=0 :y=15" # centered at 5px from top
 
 filters = []
 def genOverlays():
@@ -133,10 +141,11 @@ def genOverlays():
     layout_fg = f"v{vn+2}"
     
     border = 5
-    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw=1920 :boxcolor=black@0.6 :boxborderw={border}|25|{border}|110"
+    style_bg = f"fontcolor=white :fontsize=58 :box=1 :boxw={RES_W} :boxcolor=black@0.6 :boxborderw={border}|25|{border}|110"
     style_fg = 'fontcolor=white :fontsize=58 :box=0'
     
-    pos = f"y=860+({pos_count}*(41+{border*2}))"
+    #pos = f"y=860+({pos_count}*(41+{border*2}))"
+    pos = f"y={RES_H-220}+({pos_count}*(41+{border*2}))"
     pos_bg = f"x=50 :{pos}"
     pos_fg = f"x=200 :{pos}"
     
@@ -155,7 +164,9 @@ def genOverlays():
     pos_count += 1
   
   cnb_out = 'cnb'
-  count_nb = f"[{last}]drawtext={NP_FONT} :textfile={NCOUNT} :reload=1 :fontcolor=white :fontsize=32 :box=0 :x=5:y=932,format=rgba[nb]"
+  y_pos = RES_H - 148
+  #count_nb = f"[{last}]drawtext={NP_FONT} :textfile={NCOUNT} :reload=1 :fontcolor=white :fontsize=32 :box=0 :x=5:y=932,format=rgba[nb]"
+  count_nb = f"[{last}]drawtext={NP_FONT} :textfile={NCOUNT} :reload=1 :fontcolor=white :fontsize=32 :box=0 :x=5:y={y_pos},format=rgba[nb]"
   overlay = f"[{last}][nb]overlay=format=rgb[{cnb_out}]"
   filters.append(count_nb)
   filters.append(overlay)
@@ -171,7 +182,7 @@ inputData = [
   ]
 filters = [
     # audio waves
-    f"[1:a]showwaves=s={RES} :mode=line,colorkey=black[waves]",
+    f"[1:a]showwaves=s={RES_W}x{RES_H} :mode=line,colorkey=black[waves]",
     '[bg][waves]overlay=format=rgb[v1]',
     # local time
     f"[v1]drawtext={T_FONT} :text='%"+'{localtime\\:%T}'+f"' :{T_STYLE} :{T_POS}[t]",
